@@ -5,7 +5,7 @@ import { signIn } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import { Github, Mail, Chrome } from 'lucide-react'
+import { GitBranch, Mail, Globe } from 'lucide-react'
 
 interface SignInButtonsProps {
   callbackUrl: string
@@ -51,7 +51,7 @@ export function SignInButtons({ callbackUrl }: SignInButtonsProps) {
           onClick={() => handleOAuth('google')}
           disabled={loading !== null}
         >
-          <Chrome className="h-4 w-4" />
+          <Globe className="h-4 w-4" />
           Continue with Google
         </Button>
         <Button
@@ -60,7 +60,7 @@ export function SignInButtons({ callbackUrl }: SignInButtonsProps) {
           onClick={() => handleOAuth('github')}
           disabled={loading !== null}
         >
-          <Github className="h-4 w-4" />
+          <GitBranch className="h-4 w-4" />
           Continue with GitHub
         </Button>
       </div>

@@ -1,11 +1,10 @@
-import { NextRequest } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/auth'
 import { prisma } from '@/lib/db'
 import { decrypt } from '@/lib/encryption'
 import OpenAI from 'openai'
 
-export async function POST(_req: NextRequest) {
+export async function POST() {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
