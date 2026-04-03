@@ -1,6 +1,9 @@
 import { NextRequest } from 'next/server'
 import { openai } from '@/lib/openai'
 import { prisma } from '@/lib/db'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/auth'
+import { checkMessageLimit } from '@/lib/rate-limit'
 import { getSystemPromptForPhase, detectPhaseTransition } from '@/lib/conversation/state-machine'
 import {
   extractRequirementsFromMessage,
@@ -14,6 +17,14 @@ export const maxDuration = 60
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+
     const { projectId, message, phase } = await req.json() as {
       projectId: string
       message: string
@@ -28,6 +39,16 @@ export async function POST(req: NextRequest) {
     }
 
     const isGreeting = message === '__GREETING__'
+
+    if (!isGreeting) {
+      const { allowed, count } = await checkMessageLimit(session.user.id)
+      if (!allowed) {
+        return new Response(
+          JSON.stringify({ error: `Daily message limit reached (${count}/50). Try again tomorrow.` }),
+          { status: 429, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+    }
 
     // Save user message (skip for greeting)
     if (!isGreeting) {

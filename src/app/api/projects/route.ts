@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/auth'
 import { prisma } from '@/lib/db'
+import { checkProjectLimit } from '@/lib/rate-limit'
 
 export async function GET() {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const projects = await prisma.project.findMany({
+      where: { userId: session.user.id },
       orderBy: { updatedAt: 'desc' },
       select: {
         id: true,
@@ -22,6 +31,19 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { allowed, count } = await checkProjectLimit(session.user.id)
+  if (!allowed) {
+    return NextResponse.json(
+      { error: `Project limit reached (${count}/5). Delete a project to create a new one.` },
+      { status: 429 }
+    )
+  }
+
   try {
     const body = await req.json() as { name?: string; description?: string }
     const project = await prisma.project.create({
@@ -29,6 +51,7 @@ export async function POST(req: NextRequest) {
         name: body.name ?? 'New App',
         description: body.description,
         phase: 'DISCOVERY',
+        userId: session.user.id,
       },
     })
     return NextResponse.json(project)
