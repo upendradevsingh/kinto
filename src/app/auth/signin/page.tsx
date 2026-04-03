@@ -10,7 +10,8 @@ export default async function SignInPage({
   searchParams: { callbackUrl?: string; error?: string }
 }) {
   const session = await getServerSession(authOptions)
-  if (session) redirect(searchParams.callbackUrl ?? '/')
+  const callbackUrl = searchParams.callbackUrl?.startsWith('/') ? searchParams.callbackUrl : '/'
+  if (session) redirect(callbackUrl)
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -35,7 +36,7 @@ export default async function SignInPage({
           </div>
         )}
 
-        <SignInButtons callbackUrl={searchParams.callbackUrl ?? '/'} />
+        <SignInButtons callbackUrl={callbackUrl} />
       </div>
     </div>
   )

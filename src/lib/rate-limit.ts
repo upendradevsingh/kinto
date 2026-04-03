@@ -11,8 +11,8 @@ export async function checkProjectLimit(userId: string): Promise<{ allowed: bool
 }
 
 export async function checkMessageLimit(userId: string): Promise<{ allowed: boolean; count: number }> {
-  const startOfDay = new Date()
-  startOfDay.setHours(0, 0, 0, 0)
+  const now = new Date()
+  const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
 
   const count = await prisma.message.count({
     where: {

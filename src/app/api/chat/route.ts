@@ -50,6 +50,17 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Verify project belongs to authenticated user
+    const project = await prisma.project.findFirst({
+      where: { id: projectId, userId: session.user.id },
+    })
+    if (!project) {
+      return new Response(JSON.stringify({ error: 'Project not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+
     // Save user message (skip for greeting)
     if (!isGreeting) {
       await prisma.message.create({

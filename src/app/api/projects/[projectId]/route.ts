@@ -51,7 +51,11 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
   }
 
   try {
-    const data = await req.json() as Record<string, unknown>
+    const body = await req.json() as Record<string, unknown>
+    const allowed = ['name', 'description', 'phase', 'requirements', 'architecture', 'generatedFiles', 'previewHtml', 'updatedAt']
+    const data = Object.fromEntries(
+      Object.entries(body).filter(([key]) => allowed.includes(key))
+    )
     const project = await prisma.project.update({
       where: { id: params.projectId },
       data,
