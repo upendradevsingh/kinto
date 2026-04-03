@@ -31,6 +31,9 @@ export function encrypt(plaintext: string): EncryptedData {
 }
 
 export function decrypt(data: EncryptedData): string {
+  if (!data.encryptedKey || !data.iv || !data.tag) {
+    throw new Error('Decryption failed: missing encryptedKey, iv, or tag')
+  }
   const key = getKey()
   const decipher = createDecipheriv(
     ALGORITHM,
@@ -38,9 +41,13 @@ export function decrypt(data: EncryptedData): string {
     Buffer.from(data.iv, 'hex')
   )
   decipher.setAuthTag(Buffer.from(data.tag, 'hex'))
-  const decrypted = Buffer.concat([
-    decipher.update(Buffer.from(data.encryptedKey, 'hex')),
-    decipher.final(),
-  ])
-  return decrypted.toString('utf8')
+  try {
+    const decrypted = Buffer.concat([
+      decipher.update(Buffer.from(data.encryptedKey, 'hex')),
+      decipher.final(),
+    ])
+    return decrypted.toString('utf8')
+  } catch (err) {
+    throw new Error('Decryption failed: authentication tag mismatch — check ENCRYPTION_KEY', { cause: err })
+  }
 }
