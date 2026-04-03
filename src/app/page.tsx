@@ -1,101 +1,171 @@
-import Image from "next/image";
+import { prisma } from '@/lib/db'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Plus, Zap, FolderOpen, Clock, ArrowRight } from 'lucide-react'
+import { formatDistanceToNow } from 'date-fns'
 
-export default function Home() {
+const PHASE_LABELS: Record<string, string> = {
+  DISCOVERY: 'Discovering',
+  ARCHITECTURE: 'Designing',
+  GENERATION: 'Building',
+  COMPLETE: 'Complete',
+}
+
+export default async function HomePage() {
+  let projects: Array<{
+    id: string
+    name: string
+    description: string | null
+    phase: string
+    updatedAt: Date
+  }> = []
+
+  try {
+    projects = await prisma.project.findMany({
+      orderBy: { updatedAt: 'desc' },
+      take: 20,
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        phase: true,
+        updatedAt: true,
+      },
+    })
+  } catch {
+    // DB might not be available — show empty state
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-14 max-w-5xl items-center px-4 mx-auto">
+          <div className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">
+              <Zap className="h-4 w-4 text-primary-foreground" />
+            </div>
+            <span className="font-bold text-lg tracking-tight">Kinto</span>
+          </div>
+          <p className="ml-4 text-sm text-muted-foreground hidden sm:block">
+            Describe it. It exists.
+          </p>
+          <div className="ml-auto">
+            <Link href="/builder">
+              <Button size="sm" className="gap-2">
+                <Plus className="h-3.5 w-3.5" />
+                New App
+              </Button>
+            </Link>
+          </div>
         </div>
+      </header>
+
+      <main className="container max-w-5xl mx-auto px-4">
+        {/* Hero section */}
+        <section className="py-20 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border bg-muted/50 px-4 py-1.5 text-sm text-muted-foreground mb-6">
+            <Zap className="h-3.5 w-3.5 text-primary" />
+            AI-Powered App Builder
+          </div>
+
+          <h1 className="text-5xl sm:text-6xl font-bold tracking-tight mb-5">
+            Describe it.{' '}
+            <span className="text-primary">It exists.</span>
+          </h1>
+
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-3">
+            Tell Kinto what you want to build. It asks smart questions, designs the
+            architecture, and generates production-ready code — feature by feature.
+          </p>
+
+          <p className="text-sm text-muted-foreground mb-10">
+            No coding required. No jargon. Just describe your idea.
+          </p>
+
+          <div className="flex items-center justify-center gap-4">
+            <Link href="/builder">
+              <Button size="lg" className="gap-2 text-base px-8">
+                Start Building
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </section>
+
+        {/* Features row */}
+        <section className="pb-16 grid sm:grid-cols-3 gap-6 text-center">
+          {[
+            {
+              icon: '💬',
+              title: 'Smart Discovery',
+              description: '8-10 focused questions to understand exactly what you need',
+            },
+            {
+              icon: '🏗️',
+              title: 'Architecture First',
+              description: 'Reviews the plan with you before writing a single line of code',
+            },
+            {
+              icon: '⚡',
+              title: 'Real Code',
+              description: 'Generates production-ready Next.js + TypeScript, not just wireframes',
+            },
+          ].map(feature => (
+            <div key={feature.title} className="p-6 rounded-xl border bg-muted/20">
+              <div className="text-3xl mb-3">{feature.icon}</div>
+              <h3 className="font-semibold mb-2">{feature.title}</h3>
+              <p className="text-sm text-muted-foreground">{feature.description}</p>
+            </div>
+          ))}
+        </section>
+
+        {/* Projects section */}
+        {projects.length > 0 && (
+          <section className="pb-20">
+            <div className="flex items-center gap-2 mb-6">
+              <FolderOpen className="h-5 w-5 text-muted-foreground" />
+              <h2 className="text-xl font-semibold">Your Projects</h2>
+              <span className="text-sm text-muted-foreground">({projects.length})</span>
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {projects.map(project => (
+                <Link key={project.id} href={`/builder/${project.id}`}>
+                  <Card className="h-full hover:shadow-md hover:border-primary/30 transition-all cursor-pointer group">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <CardTitle className="text-base group-hover:text-primary transition-colors line-clamp-1">
+                          {project.name}
+                        </CardTitle>
+                        <Badge
+                          variant={project.phase === 'COMPLETE' ? 'default' : 'secondary'}
+                          className="shrink-0 text-xs"
+                        >
+                          {PHASE_LABELS[project.phase] ?? project.phase}
+                        </Badge>
+                      </div>
+                      {project.description && (
+                        <CardDescription className="line-clamp-2 text-sm mt-1">
+                          {project.description}
+                        </CardDescription>
+                      )}
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        {formatDistanceToNow(project.updatedAt, { addSuffix: true })}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
-  );
+  )
 }
