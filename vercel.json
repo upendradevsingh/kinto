@@ -1,0 +1,15 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npx prisma generate && next build",
+  "env": {
+    "DATABASE_URL": "@kinto-database-url",
+    "OPENAI_API_KEY": "@kinto-openai-key",
+    "NEXTAUTH_SECRET": "@kinto-nextauth-secret",
+    "GOOGLE_CLIENT_ID": "@kinto-google-client-id",
+    "GOOGLE_CLIENT_SECRET": "@kinto-google-client-secret",
+    "GITHUB_CLIENT_ID": "@kinto-github-client-id",
+    "GITHUB_CLIENT_SECRET": "@kinto-github-client-secret",
+    "RESEND_API_KEY": "@kinto-resend-api-key",
+    "EMAIL_FROM": "@kinto-email-from"
+  }
+}

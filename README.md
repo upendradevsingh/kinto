@@ -4,6 +4,12 @@
 
 An AI-powered application builder where non-technical users describe what they need in plain English, and the system architects, builds, and deploys a production-ready application.
 
+## Deploy
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fupendradevsingh%2Fkinto&env=DATABASE_URL,OPENAI_API_KEY,NEXTAUTH_SECRET,NEXTAUTH_URL,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,GITHUB_CLIENT_ID,GITHUB_CLIENT_SECRET,RESEND_API_KEY,EMAIL_FROM&envDescription=Required%20environment%20variables%20for%20Kinto&envLink=https%3A%2F%2Fgithub.com%2Fupendradevsingh%2Fkinto%2Fblob%2Fmain%2F.env.example&project-name=kinto&repository-name=kinto)
+
+One-click deploy to Vercel. You'll need a [Supabase](https://supabase.com) database (free) and an [OpenAI API key](https://platform.openai.com/api-keys). See the [full deployment guide](docs/DEPLOYMENT.md).
+
 ## What Is This?
 
 Think of it as having a **tech co-founder who asks the right questions before writing code.** Unlike other AI code generators that jump straight to code from a prompt, this tool:
@@ -35,6 +41,7 @@ Think of it as having a **tech co-founder who asks the right questions before wr
 ## Documentation
 
 - [Product Requirements Document](docs/PRODUCT-REQUIREMENTS.md) — Full product spec with architecture, conversation design, verification framework, and MVP scope
+- [Deployment Guide](docs/DEPLOYMENT.md) — Step-by-step deployment with Vercel + Supabase
 
 ## Who Is This For?
 
