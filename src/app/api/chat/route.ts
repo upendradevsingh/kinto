@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
-import { openai } from '@/lib/openai'
+import OpenAI from 'openai'
+import { decrypt } from '@/lib/encryption'
 import { prisma } from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/auth'
@@ -24,6 +25,24 @@ export async function POST(req: NextRequest) {
         headers: { 'Content-Type': 'application/json' },
       })
     }
+
+    // Fetch user's API key
+    const apiKeyRecord = await prisma.apiKey.findUnique({
+      where: { userId: session.user.id },
+    })
+    if (!apiKeyRecord) {
+      return new Response(
+        JSON.stringify({ error: 'no_api_key', message: 'Please add your OpenAI API key in Settings to start building.' }),
+        { status: 403, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const decryptedKey = decrypt({
+      encryptedKey: apiKeyRecord.encryptedKey,
+      iv: apiKeyRecord.iv,
+      tag: apiKeyRecord.tag,
+    })
+    const openai = new OpenAI({ apiKey: decryptedKey })
 
     const { projectId, message, phase } = await req.json() as {
       projectId: string
