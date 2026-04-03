@@ -37,11 +37,19 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const decryptedKey = decrypt({
-      encryptedKey: apiKeyRecord.encryptedKey,
-      iv: apiKeyRecord.iv,
-      tag: apiKeyRecord.tag,
-    })
+    let decryptedKey: string
+    try {
+      decryptedKey = decrypt({
+        encryptedKey: apiKeyRecord.encryptedKey,
+        iv: apiKeyRecord.iv,
+        tag: apiKeyRecord.tag,
+      })
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'key_decrypt_error', message: 'Failed to decrypt your API key. Please re-add it in Settings.' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
     const openai = new OpenAI({ apiKey: decryptedKey })
 
     const { projectId, message, phase } = await req.json() as {
