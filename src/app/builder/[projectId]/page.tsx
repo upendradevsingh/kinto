@@ -1,5 +1,7 @@
 import { prisma } from '@/lib/db'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/auth'
 import { BuilderLayout } from '@/components/layout/BuilderLayout'
 
 interface BuilderPageProps {
@@ -7,8 +9,11 @@ interface BuilderPageProps {
 }
 
 export default async function BuilderPage({ params }: BuilderPageProps) {
-  const project = await prisma.project.findUnique({
-    where: { id: params.projectId },
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.id) redirect('/auth/signin')
+
+  const project = await prisma.project.findFirst({
+    where: { id: params.projectId, userId: session.user.id },
     include: {
       messages: {
         where: { role: { not: 'SYSTEM' } },
@@ -33,6 +38,7 @@ export default async function BuilderPage({ params }: BuilderPageProps) {
       initialPhase={project.phase}
       initialPreviewHtml={project.previewHtml}
       initialFiles={(project.generatedFiles as Record<string, string>) ?? {}}
+      user={session.user}
     />
   )
 }

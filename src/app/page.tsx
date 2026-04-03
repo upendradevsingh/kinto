@@ -1,10 +1,13 @@
 import { prisma } from '@/lib/db'
 import Link from 'next/link'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/auth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Zap, FolderOpen, Clock, ArrowRight } from 'lucide-react'
+import { Plus, Zap, FolderOpen, Clock, ArrowRight, LogIn } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
+import { SignOutButton } from '@/components/auth/SignOutButton'
 
 const PHASE_LABELS: Record<string, string> = {
   DISCOVERY: 'Discovering',
@@ -14,6 +17,8 @@ const PHASE_LABELS: Record<string, string> = {
 }
 
 export default async function HomePage() {
+  const session = await getServerSession(authOptions)
+
   let projects: Array<{
     id: string
     name: string
@@ -22,20 +27,23 @@ export default async function HomePage() {
     updatedAt: Date
   }> = []
 
-  try {
-    projects = await prisma.project.findMany({
-      orderBy: { updatedAt: 'desc' },
-      take: 20,
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        phase: true,
-        updatedAt: true,
-      },
-    })
-  } catch {
-    // DB might not be available — show empty state
+  if (session?.user?.id) {
+    try {
+      projects = await prisma.project.findMany({
+        where: { userId: session.user.id },
+        orderBy: { updatedAt: 'desc' },
+        take: 20,
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          phase: true,
+          updatedAt: true,
+        },
+      })
+    } catch {
+      // DB might not be available — show empty state
+    }
   }
 
   return (
@@ -52,13 +60,39 @@ export default async function HomePage() {
           <p className="ml-4 text-sm text-muted-foreground hidden sm:block">
             Describe it. It exists.
           </p>
-          <div className="ml-auto">
-            <Link href="/builder">
-              <Button size="sm" className="gap-2">
-                <Plus className="h-3.5 w-3.5" />
-                New App
-              </Button>
-            </Link>
+          <div className="ml-auto flex items-center gap-3">
+            {session?.user ? (
+              <>
+                {session.user.image ? (
+                  <img
+                    src={session.user.image}
+                    alt={session.user.name ?? ''}
+                    className="h-7 w-7 rounded-full"
+                  />
+                ) : (
+                  <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
+                    {(session.user.name ?? session.user.email ?? '?')[0].toUpperCase()}
+                  </div>
+                )}
+                <span className="text-sm text-muted-foreground hidden sm:block">
+                  {session.user.name ?? session.user.email}
+                </span>
+                <Link href="/builder">
+                  <Button size="sm" className="gap-2">
+                    <Plus className="h-3.5 w-3.5" />
+                    New App
+                  </Button>
+                </Link>
+                <SignOutButton />
+              </>
+            ) : (
+              <Link href="/auth/signin">
+                <Button size="sm" variant="outline" className="gap-2">
+                  <LogIn className="h-3.5 w-3.5" />
+                  Sign in
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </header>
@@ -86,12 +120,21 @@ export default async function HomePage() {
           </p>
 
           <div className="flex items-center justify-center gap-4">
-            <Link href="/builder">
-              <Button size="lg" className="gap-2 text-base px-8">
-                Start Building
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
+            {session?.user ? (
+              <Link href="/builder">
+                <Button size="lg" className="gap-2 text-base px-8">
+                  Start Building
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            ) : (
+              <Link href="/auth/signin">
+                <Button size="lg" className="gap-2 text-base px-8">
+                  Get Started
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            )}
           </div>
         </section>
 
@@ -123,7 +166,7 @@ export default async function HomePage() {
         </section>
 
         {/* Projects section */}
-        {projects.length > 0 && (
+        {session?.user && projects.length > 0 && (
           <section className="pb-20">
             <div className="flex items-center gap-2 mb-6">
               <FolderOpen className="h-5 w-5 text-muted-foreground" />

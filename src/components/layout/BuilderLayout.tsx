@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import Link from 'next/link'
+import { signOut } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import {
   ResizableHandle,
@@ -26,6 +27,11 @@ interface BuilderLayoutProps {
   initialPhase?: string
   initialPreviewHtml?: string | null
   initialFiles?: Record<string, string>
+  user?: {
+    name?: string | null
+    email?: string | null
+    image?: string | null
+  }
 }
 
 export function BuilderLayout({
@@ -35,6 +41,7 @@ export function BuilderLayout({
   initialPhase = 'GREETING',
   initialPreviewHtml = null,
   initialFiles = {},
+  user,
 }: BuilderLayoutProps) {
   const [previewHtml, setPreviewHtml] = useState<string | null>(initialPreviewHtml)
   const [files, setFiles] = useState<Record<string, string>>(initialFiles)
@@ -70,13 +77,28 @@ export function BuilderLayout({
           <span className="text-sm font-semibold truncate max-w-[200px]">{name}</span>
         </div>
 
-        <div className="ml-auto flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">
-            Phase:
-          </span>
+        <div className="ml-auto flex items-center gap-3">
+          <span className="text-xs text-muted-foreground">Phase:</span>
           <span className="text-xs font-medium capitalize bg-muted px-2 py-0.5 rounded-full">
             {phaseLabel}
           </span>
+          {user && (
+            <>
+              {user.image ? (
+                <img src={user.image} alt={user.name ?? ''} className="h-6 w-6 rounded-full" />
+              ) : (
+                <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
+                  {(user.name ?? user.email ?? '?')[0].toUpperCase()}
+                </div>
+              )}
+              <button
+                onClick={() => signOut({ callbackUrl: '/' })}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Sign out
+              </button>
+            </>
+          )}
         </div>
       </header>
 
