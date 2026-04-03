@@ -5,7 +5,7 @@ import { authOptions } from '@/auth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Zap, FolderOpen, Clock, ArrowRight, LogIn } from 'lucide-react'
+import { Plus, Zap, FolderOpen, Clock, ArrowRight, LogIn, KeyRound } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { SignOutButton } from '@/components/auth/SignOutButton'
 
@@ -43,6 +43,19 @@ export default async function HomePage() {
       })
     } catch {
       // DB might not be available — show empty state
+    }
+  }
+
+  let hasApiKey = false
+  if (session?.user?.id) {
+    try {
+      const apiKey = await prisma.apiKey.findUnique({
+        where: { userId: session.user.id },
+        select: { id: true },
+      })
+      hasApiKey = !!apiKey
+    } catch {
+      // ignore
     }
   }
 
@@ -96,6 +109,23 @@ export default async function HomePage() {
           </div>
         </div>
       </header>
+
+      {session?.user && !hasApiKey && (
+        <div className="border-b bg-amber-50 dark:bg-amber-950/20">
+          <div className="container max-w-5xl mx-auto px-4 py-2.5 flex items-center gap-3">
+            <KeyRound className="h-4 w-4 text-amber-600 shrink-0" />
+            <p className="text-sm text-amber-800 dark:text-amber-200">
+              Add your OpenAI API key to start building
+            </p>
+            <Link href="/settings/api-keys" className="ml-auto">
+              <Button size="sm" variant="outline" className="gap-1.5 border-amber-400 text-amber-800 hover:bg-amber-100 dark:text-amber-200 dark:border-amber-600 dark:hover:bg-amber-900/30">
+                Add API key
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
 
       <main className="container max-w-5xl mx-auto px-4">
         {/* Hero section */}
