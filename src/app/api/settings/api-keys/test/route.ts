@@ -22,14 +22,23 @@ export async function POST(_req: NextRequest) {
     })
   }
 
+  let plainKey: string
   try {
-    const plainKey = decrypt({
+    plainKey = decrypt({
       encryptedKey: record.encryptedKey,
       iv: record.iv,
       tag: record.tag,
     })
+  } catch (err) {
+    console.error('Decryption failed in test route:', err)
+    return new Response(
+      JSON.stringify({ ok: false, error: 'Server configuration error — contact support' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    )
+  }
+
+  try {
     const client = new OpenAI({ apiKey: plainKey })
-    // Minimal test: list models (very cheap, just validates the key)
     await client.models.list()
     return new Response(JSON.stringify({ ok: true }), {
       headers: { 'Content-Type': 'application/json' },

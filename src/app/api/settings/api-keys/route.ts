@@ -32,10 +32,29 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  const { key, provider = 'openai' } = await req.json() as { key: string; provider?: string }
+  let key: string
+  let provider: string = 'openai'
+  try {
+    const body = await req.json() as { key?: string; provider?: string }
+    key = body.key ?? ''
+    provider = body.provider ?? 'openai'
+  } catch {
+    return new Response(JSON.stringify({ error: 'Invalid request body' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
 
   if (!key || typeof key !== 'string' || key.trim().length < 10) {
     return new Response(JSON.stringify({ error: 'Invalid API key' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
+  const ALLOWED_PROVIDERS = ['openai']
+  if (!ALLOWED_PROVIDERS.includes(provider)) {
+    return new Response(JSON.stringify({ error: 'Invalid provider' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
     })
