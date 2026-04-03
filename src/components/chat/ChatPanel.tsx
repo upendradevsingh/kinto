@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { ChatMessage } from './ChatMessage'
 import { ChatInput } from './ChatInput'
 import { cleanMessageForDisplay } from '@/lib/conversation/requirements-builder'
-import { Sparkles } from 'lucide-react'
+import { Sparkles, KeyRound } from 'lucide-react'
 
 interface Message {
   id: string
@@ -33,6 +33,7 @@ export function ChatPanel({
   const [streamingContent, setStreamingContent] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [currentPhase, setCurrentPhase] = useState(phase)
+  const [noApiKey, setNoApiKey] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const hasGreeted = useRef(false)
 
@@ -49,6 +50,7 @@ export function ChatPanel({
   const streamChat = useCallback(
     async (userMessage: string, isGreeting = false) => {
       if (isLoading) return
+      setNoApiKey(false)
       setIsLoading(true)
       setStreamingContent('')
 
@@ -62,6 +64,12 @@ export function ChatPanel({
             phase: currentPhase,
           }),
         })
+
+        if (response.status === 403) {
+          setNoApiKey(true)
+          setIsLoading(false)
+          return
+        }
 
         if (!response.ok || !response.body) {
           throw new Error(`Chat request failed: ${response.status}`)
@@ -225,6 +233,20 @@ export function ChatPanel({
           </div>
         )}
       </div>
+
+      {/* No API key banner */}
+      {noApiKey && (
+        <div className="shrink-0 mx-4 mb-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 flex items-start gap-2">
+          <KeyRound className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+          <p className="text-sm text-amber-800 dark:text-amber-200">
+            To start building,{' '}
+            <a href="/settings/api-keys" className="underline underline-offset-2 font-medium">
+              add your OpenAI API key
+            </a>
+            {' '}in Settings.
+          </p>
+        </div>
+      )}
 
       {/* Input */}
       <div className="shrink-0">
