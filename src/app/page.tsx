@@ -5,7 +5,7 @@ import { authOptions } from '@/auth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Zap, FolderOpen, Clock, ArrowRight, LogIn, KeyRound } from 'lucide-react'
+import { Plus, Zap, FolderOpen, Clock, ArrowRight, LogIn, KeyRound, Settings } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { SignOutButton } from '@/components/auth/SignOutButton'
 
@@ -90,6 +90,12 @@ export default async function HomePage() {
                 <span className="text-sm text-muted-foreground hidden sm:block">
                   {session.user.name ?? session.user.email}
                 </span>
+                <Link href="/settings/api-keys">
+                  <Button size="sm" variant="ghost" className="gap-1.5">
+                    <Settings className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline text-xs">Settings</span>
+                  </Button>
+                </Link>
                 <Link href="/builder">
                   <Button size="sm" className="gap-2">
                     <Plus className="h-3.5 w-3.5" />

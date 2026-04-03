@@ -12,7 +12,7 @@ import {
 import { ChatPanel } from '@/components/chat/ChatPanel'
 import { PreviewPanel } from '@/components/preview/PreviewPanel'
 import { CodePanel } from '@/components/code/CodePanel'
-import { ArrowLeft, Zap } from 'lucide-react'
+import { ArrowLeft, Zap, Settings } from 'lucide-react'
 
 interface Message {
   id: string
@@ -82,6 +82,12 @@ export function BuilderLayout({
           <span className="text-xs font-medium capitalize bg-muted px-2 py-0.5 rounded-full">
             {phaseLabel}
           </span>
+          <Link href="/settings/api-keys">
+            <Button variant="ghost" size="sm" className="gap-1.5 text-xs">
+              <Settings className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Settings</span>
+            </Button>
+          </Link>
           {user && (
             <>
               {user.image ? (
