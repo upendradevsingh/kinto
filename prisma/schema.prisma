@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProjectPhase {
+  DISCOVERY
+  ARCHITECTURE
+  GENERATION
+  COMPLETE
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+model Project {
+  id             String        @id @default(cuid())
+  name           String
+  description    String?
+  phase          ProjectPhase  @default(DISCOVERY)
+  requirements   Json?
+  architecture   Json?
+  generatedFiles Json?
+  previewHtml    String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  messages       Message[]
+}
+
+model Message {
+  id        String      @id @default(cuid())
+  projectId String
+  project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  role      MessageRole
+  content   String
+  metadata  Json?
+  createdAt DateTime    @default(now())
+
+  @@index([projectId])
+}
