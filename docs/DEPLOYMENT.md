@@ -5,8 +5,7 @@
 ### Prerequisites
 1. A [Vercel](https://vercel.com) account (free)
 2. A [Supabase](https://supabase.com) project (free tier — 500MB PostgreSQL)
-3. An [OpenAI](https://platform.openai.com) API key
-4. OAuth credentials (see below)
+3. OAuth credentials (see below)
 
 ### Step 1: Create Supabase Database
 
@@ -27,7 +26,7 @@ Click the button above, then fill in the environment variables:
 | Variable | Where to Get It |
 |----------|----------------|
 | `DATABASE_URL` | Supabase → Settings → Database → Connection string |
-| `OPENAI_API_KEY` | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
+| `ENCRYPTION_KEY` | Run `openssl rand -base64 32` in your terminal |
 | `NEXTAUTH_SECRET` | Run `openssl rand -base64 32` in your terminal |
 | `NEXTAUTH_URL` | Your Vercel deployment URL (e.g., `https://kinto-xxx.vercel.app`) |
 | `GOOGLE_CLIENT_ID` | Google Cloud Console (see OAuth Setup below) |
@@ -36,6 +35,20 @@ Click the button above, then fill in the environment variables:
 | `GITHUB_CLIENT_SECRET` | GitHub Developer Settings |
 | `RESEND_API_KEY` | [resend.com/api-keys](https://resend.com/api-keys) |
 | `EMAIL_FROM` | Your verified Resend sender email |
+
+### ENCRYPTION_KEY (required)
+
+Kinto uses AES-256-GCM to encrypt user-provided OpenAI API keys at rest. You must generate a 32-byte random key:
+
+```bash
+openssl rand -base64 32
+```
+
+Set the output as the `ENCRYPTION_KEY` environment variable.
+
+> **Important:** Never rotate this key without first migrating all stored encrypted keys. If the key changes, existing users will need to re-enter their API keys.
+
+> **Note:** `OPENAI_API_KEY` is no longer required at the server level — users supply their own keys via the Settings page.
 
 ### Step 3: Run Database Migrations
 
