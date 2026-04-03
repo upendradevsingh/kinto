@@ -11,7 +11,7 @@ interface ApiKey {
   id: string
   provider: string
   lastFour: string
-  createdAt: string
+  createdAt: string // ISO string — Date is serialized to string when crossing server/client boundary
 }
 
 interface ApiKeyManagerProps {
@@ -98,7 +98,7 @@ export function ApiKeyManager({ initialApiKey }: ApiKeyManagerProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <KeyRound className="h-4 w-4 text-primary" />
-                <CardTitle className="text-base">OpenAI API Key</CardTitle>
+                <CardTitle className="text-base">{apiKey.provider === 'openai' ? 'OpenAI' : apiKey.provider} API Key</CardTitle>
                 <Badge variant="secondary" className="text-xs">Active</Badge>
               </div>
               <Button
