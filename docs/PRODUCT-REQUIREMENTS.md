@@ -1,6 +1,6 @@
-# AI App Builder — Product Requirements Document
+# Kinto — Product Requirements Document
 
-> An AI-powered application builder where non-technical users describe what they need, and the system architects, builds, and deploys a production-ready application.
+> *Describe it. It exists.* An AI-powered application builder where non-technical users describe what they need, and the system architects, builds, and deploys a production-ready application.
 
 **Version:** 1.0  
 **Date:** 2026-04-03  

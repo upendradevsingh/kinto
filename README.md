@@ -1,4 +1,6 @@
-# AI App Builder
+# Kinto
+
+> *Kinetic + Into — ideas move into existence.*
 
 An AI-powered application builder where non-technical users describe what they need in plain English, and the system architects, builds, and deploys a production-ready application.
 
@@ -73,6 +75,10 @@ AI: Final app → one-click deploy → live URL
 ## Status
 
 🚧 **Under Development** — See the [Product Requirements Document](docs/PRODUCT-REQUIREMENTS.md) for the full specification.
+
+## Why "Kinto"?
+
+**Kinetic + Into** — the energy of your idea moving into reality. You describe it, Kinto brings it to life.
 
 ## License
 
