@@ -5,6 +5,7 @@ import { ChatMessage } from './ChatMessage'
 import { ChatInput } from './ChatInput'
 import { cleanMessageForDisplay } from '@/lib/conversation/requirements-builder'
 import { Sparkles, KeyRound } from 'lucide-react'
+import Link from 'next/link'
 
 interface Message {
   id: string
@@ -240,9 +241,9 @@ export function ChatPanel({
           <KeyRound className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
           <p className="text-sm text-amber-800 dark:text-amber-200">
             To start building,{' '}
-            <a href="/settings/api-keys" className="underline underline-offset-2 font-medium">
+            <Link href="/settings/api-keys" className="underline underline-offset-2 font-medium">
               add your OpenAI API key
-            </a>
+            </Link>
             {' '}in Settings.
           </p>
         </div>
